@@ -18,14 +18,15 @@ public class AudioConversionService {
 
     public byte[] convertToWav(String filePath) {
         File sourceFile = new File(filePath);
-        File convertedWavFile = new File(filePath + "-WAV.txt");
+        File convertedWavBAFile = new File(filePath + "-WAV-BA.txt");
+        File convertedWavB64File = new File(filePath + "-WAV-B64.txt");
         try {
             AudioInputStream audioStream = AudioSystem.getAudioInputStream(sourceFile);
             AudioInputStream formattedAudioStream = AudioSystem.getAudioInputStream(wavResultFormat, audioStream);
             AudioInputStream lengthAddedAudioStream = new AudioInputStream(formattedAudioStream, wavResultFormat, sourceFile.length());
             ByteArrayOutputStream convertedOutputStream = new ByteArrayOutputStream();
             AudioSystem.write(lengthAddedAudioStream, AudioFileFormat.Type.WAVE, convertedOutputStream);
-            writeFile(convertedOutputStream.toByteArray(), convertedWavFile);
+            writeFile(convertedOutputStream.toByteArray(), convertedWavBAFile, convertedWavB64File);
             return convertedOutputStream.toByteArray();
         }
         catch(Exception ex) {
@@ -36,25 +37,23 @@ public class AudioConversionService {
 
     public void convertWavToRaw(byte[] wavByteArray, String filePath) {
         try {
-            File convertedRawFile = new File(filePath + "-RAW.txt");
+            File convertedRawBAFile = new File(filePath + "-RAW-BA.txt");
+            File convertedRawB64File = new File(filePath + "-RAW-B64.txt");
             byte[] rawByteArray = Arrays.copyOfRange(wavByteArray, 44, wavByteArray.length);
-            String base64String = Base64.getEncoder().encodeToString(rawByteArray);
-            writeFile(base64String, convertedRawFile);
+            writeFile(rawByteArray, convertedRawBAFile, convertedRawB64File);
         }
         catch(Exception ex) {
             System.out.println(ex);
         }
     }
 
-    static void writeFile(byte[] byteArray, File file) throws IOException {
-        OutputStream os = new FileOutputStream(file);
+    static void writeFile(byte[] byteArray, File fileBA, File fileB64) throws IOException {
+        OutputStream os = new FileOutputStream(fileBA);
         os.write(byteArray);
         os.close();
-    }
-
-    static void writeFile(String string, File file) throws IOException {
-        OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8);
-        osw.write(string);
+        String base64String = Base64.getEncoder().encodeToString(byteArray);
+        OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(fileB64), StandardCharsets.UTF_8);
+        osw.write(base64String);
         osw.close();
     }
 }

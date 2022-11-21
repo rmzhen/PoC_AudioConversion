@@ -19,5 +19,4 @@ public class AudioconversionApplication {
 		byte[] wavByteArray = audioConversionService.convertToWav(filePath);
 		audioConversionService.convertWavToRaw(wavByteArray, filePath);
 	}
-
 }
